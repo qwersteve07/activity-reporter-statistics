@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
-import dataCSV from "./data.csv";
-import { parseCsvToData } from "./parse-csv-to-data";
-import { copyToClipboard } from "./clipboard";
+import dataCSV from "./data/data.csv";
+import { parseCsvToData } from "./utils/parse-csv-to-data";
+import { copyToClipboard } from "./utils/clipboard";
 import { CatagType, GroupType, ReporterType } from "./types/data";
 
 function App() {

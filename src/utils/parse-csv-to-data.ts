@@ -1,5 +1,5 @@
-import { CatagType, GroupType } from "./types/data"
-import { RowType } from "./types/rawData"
+import { CatagType, GroupType } from "../types/data"
+import { RowType } from "../types/rawData"
 
 const formatMobile = (mobile: string) => {
     return mobile.replaceAll('-', '').padStart(10, '0')
