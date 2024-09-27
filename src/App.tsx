@@ -258,7 +258,7 @@ function App() {
         位記者
         <br />
       </header>
-      <div className="flex-1 w-full text-left p-6 overflow-auto">
+      <div className="w-full text-left p-6 overflow-auto h-[calc(100%-170px)]">
         {data.map((d: CatagType) => {
           return (
             <React.Fragment key={d.name}>
