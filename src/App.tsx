@@ -19,9 +19,9 @@ function App() {
         const dGroup = d.group.map((g: any) => {
           let reporters = g.reporters.map((r: any) => ({
             ...r,
-            checked: true,
+            checked: false,
           }));
-          return { ...g, reporters, checked: true };
+          return { ...g, reporters, checked: false };
         });
 
         return { ...d, group: dGroup };
