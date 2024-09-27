@@ -4,6 +4,7 @@ import dataCSV from "./data/data.csv";
 import { parseCsvToData } from "./utils/parse-csv-to-data";
 import { copyToClipboard } from "./utils/clipboard";
 import { CatagType, GroupType, ReporterType } from "./types/data";
+import { sessionGetData, sessionSaveData } from "./utils/storage";
 
 function App() {
   const [data, setData] = useState<Array<CatagType>>([]);
@@ -16,6 +17,16 @@ function App() {
   const [document, setDocument] = useState<string>("");
 
   useEffect(() => {
+    if (data.length === 0) return
+    sessionSaveData(data)
+  }, [data])
+
+  useEffect(() => {
+    const sessionData = sessionGetData()
+    if (sessionData) {
+      setData(sessionData)
+      return;
+    }
     const rawData = parseCsvToData(dataCSV);
     setData(() => {
       return rawData.map((data) => {
@@ -33,7 +44,6 @@ function App() {
   }, []);
 
   function generateContent() {
-
     const result: Array<{
       actualCompanyCounts: number,
       actualReporterCounts: number
@@ -297,7 +307,7 @@ function App() {
           openDocumentDialog();
         }}
       >
-        複製內容
+        產出統整結果
       </button>
     </main>
   );
