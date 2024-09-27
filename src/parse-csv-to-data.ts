@@ -1,12 +1,15 @@
+import { CatagType, GroupType } from "./types/data"
+import { RowType } from "./types/rawData"
+
 const formatMobile = (mobile: string) => {
     return mobile.replaceAll('-', '').padStart(10, '0')
 }
 
-export const parseCsvToData = (data: any) => {
-    let catags: any = {}
+export const parseCsvToData = (data: Array<RowType>) => {
+    const catags: {[key: string]: Array<RowType>} = {}
 
-    data.forEach((d: any) => {
-        let catagName = d['分類']
+    data.forEach((d: RowType) => {
+        const catagName = d['分類']
         if (!catags[catagName]) {
             catags[catagName] = [d]
         } else {
@@ -14,32 +17,32 @@ export const parseCsvToData = (data: any) => {
         }
     })
 
-    let result = []
+    const result: Array<CatagType> = []
 
     Object.entries(catags).forEach(c => {
-        const groupsArr: any = c[1]
-        let groups: any = {}
-        groupsArr.forEach((g: any) => {
-            const mediaName = g['媒體']
+        const RowArr: Array<RowType> = c[1]
+        const groups: {[key:string]: GroupType} = {}
+        RowArr.forEach((row: RowType) => {
+            const mediaName = row['媒體']
             if (!groups[mediaName]) {
                 groups[mediaName] = {
                     name: mediaName,
                     reporters: [{
-                        name: g['名字'],
-                        mobile: formatMobile(g['電話'])
+                        name: row['名字'],
+                        mobile: formatMobile(row['電話'])
                     }]
                 }
             } else {
                 groups[mediaName].reporters.push({
-                    name: g['名字'],
-                    mobile: formatMobile(g['電話'])
+                    name: row['名字'],
+                    mobile: formatMobile(row['電話'])
                 })
             }
         })
 
         result.push({
             name: c[0],
-            group: Object.values(groups)
+            groups: Object.values(groups)
         })
     })
 

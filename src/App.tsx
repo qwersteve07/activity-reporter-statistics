@@ -1,13 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
-// import rawData from './data.json'
 import dataCSV from "./data.csv";
 import { parseCsvToData } from "./parse-csv-to-data";
 import { copyToClipboard } from "./clipboard";
+import { CatagType, GroupType, ReporterType } from "./types/data";
 
 function App() {
-  const [data, setData] = useState<any>([]);
-  const [reporterDialogData, setReporterDialogData] = useState<any>([]);
+  const [data, setData] = useState<Array<CatagType>>([]);
+  const [reporterDialogData, setReporterDialogData] = useState<{
+    name: string,
+    group: GroupType
+  }>();
   const reportersDialogRef = useRef<HTMLDialogElement>(null);
   const documentDialogRef = useRef<HTMLDialogElement>(null);
   const [document, setDocument] = useState<string>("");
@@ -15,36 +18,34 @@ function App() {
   useEffect(() => {
     const rawData = parseCsvToData(dataCSV);
     setData(() => {
-      return rawData.map((d) => {
-        const dGroup = d.group.map((g: any) => {
-          let reporters = g.reporters.map((r: any) => ({
-            ...r,
+      return rawData.map((data) => {
+        const dataGroup = data.groups.map((group: GroupType) => {
+          const reporters = group.reporters.map((reporter: ReporterType) => ({
+            ...reporter,
             checked: false,
           }));
-          return { ...g, reporters, checked: false };
+          return { ...group, reporters, checked: false };
         });
 
-        return { ...d, group: dGroup };
+        return { ...data, groups: dataGroup };
       });
     });
   }, []);
 
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
-  useEffect(() => {
-    console.log(document);
-  }, [document]);
-
   function generateContent() {
-    let result = [];
+
+    const result: Array<{
+      actualCompanyCounts: number,
+      actualReporterCounts: number
+    }> = [];
+
     data.forEach((d) => {
       result.push({
-        actualCompanyCounts: d.group.filter((g: any) => g.checked).length,
-        actualReporterCounts: d.group
-          .filter((g: any) => g.checked)
-          .reduce((gacc: any, gcur: any) => {
-            return gcur.reporters.filter((r: any) => r.checked).length + gacc;
+        actualCompanyCounts: d.groups.filter((group: GroupType) => group.checked).length,
+        actualReporterCounts: d.groups
+          .filter((group: GroupType) => group.checked)
+          .reduce((groupAcc: number, groupCur: GroupType) => {
+            return groupCur.reporters.filter((reporter: ReporterType) => reporter.checked).length + groupAcc;
           }, 0),
       });
     });
@@ -53,10 +54,10 @@ function App() {
     )} 家 ${getReporterActualCounts(data)} 人\n\n${result
       .map((r, i) => {
         return `${data[i].name}( ${r.actualCompanyCounts} 家 ${r.actualReporterCounts
-          } 人)\n${data[i].group
+          } 人)\n${data[i].groups
             .filter((g) => g.checked)
             .map((g) => {
-              let reporterCounts = g.reporters.filter((r) => r.checked).length;
+              const reporterCounts = g.reporters.filter((r) => r.checked).length;
               if (reporterCounts > 1) {
                 return `${g.name}(${reporterCounts}人)`;
               } else {
@@ -71,35 +72,35 @@ function App() {
     setDocument(text);
   }
 
-  function getCompanyEstimateCounts(list: any) {
-    return list.reduce((acc: any, cur: any) => {
-      return cur.group.length + acc;
+  function getCompanyEstimateCounts(list: Array<CatagType>) {
+    return list.reduce((acc: number, cur: CatagType) => {
+      return cur.groups.length + acc;
     }, 0);
   }
 
-  function getCompanyActualCounts(list: any) {
-    return list.reduce((acc: any, cur: any) => {
-      return cur.group.filter((g: any) => g.checked).length + acc;
+  function getCompanyActualCounts(list: Array<CatagType>) {
+    return list.reduce((acc: number, cur: CatagType) => {
+      return cur.groups.filter((group: GroupType) => group.checked).length + acc;
     }, 0);
   }
 
-  function getReporterEstimateCounts(list: any) {
-    return list.reduce((acc: any, cur: any) => {
+  function getReporterEstimateCounts(list: Array<CatagType>) {
+    return list.reduce((acc: number, cur: CatagType) => {
       return (
-        cur.group.reduce((gacc: any, gcur: any) => {
-          return gcur.reporters.length + gacc;
+        cur.groups.reduce((groupAcc: number, groupCur: GroupType) => {
+          return groupCur.reporters.length + groupAcc;
         }, 0) + acc
       );
     }, 0);
   }
 
-  function getReporterActualCounts(list: any) {
-    return list.reduce((acc: any, cur: any) => {
+  function getReporterActualCounts(list: Array<CatagType>) {
+    return list.reduce((acc: number, cur: CatagType) => {
       return (
-        cur.group
-          .filter((g: any) => g.checked)
-          .reduce((gacc: any, gcur: any) => {
-            return gcur.reporters.filter((r: any) => r.checked).length + gacc;
+        cur.groups
+          .filter((group: GroupType) => group.checked)
+          .reduce((acc: number, cur: GroupType) => {
+            return cur.reporters.filter((reporter: ReporterType) => reporter.checked).length + acc;
           }, 0) + acc
       );
     }, 0);
@@ -110,35 +111,41 @@ function App() {
     groupName: string,
     checked: boolean
   ) {
-    setData((prev: any) => {
-      return prev.map((p: any) => {
+    setData((prev: Array<CatagType>) => {
+      return prev.map((p: CatagType) => {
         if (p.name === catagName) {
-          let targetGroup = p.group.find((g: any) => g.name === groupName);
-          targetGroup.checked = !checked;
+          const targetGroup = p.groups.find((group: GroupType) => group.name === groupName);
+          if (targetGroup) {
+            targetGroup.checked = !checked;
+          }
         }
         return p;
       });
     });
   }
 
-  function changeReporterAttend(reporter: any, checked: boolean) {
-    setData((prev: any) => {
-      return prev.map((p: any) => {
-        if (p.name === reporterDialogData.name) {
-          let targetGroup = p.group.find(
-            (g: any) => g.name === reporterDialogData.group.name
+  function changeReporterAttend(currentReporter: ReporterType, checked: boolean) {
+    setData((prev: Array<CatagType>) => {
+      return prev.map((p: CatagType) => {
+        if (p.name === reporterDialogData?.name) {
+          const targetGroup = p.groups.find(
+            (group: GroupType) => group.name === reporterDialogData.group.name
           );
-          let targetReporter = targetGroup.reporters.find(
-            (r: any) => r.name === reporter.name
-          );
-          targetReporter.checked = !checked;
+          if (targetGroup) {
+            const targetReporter = targetGroup.reporters.find(
+              (reporter: ReporterType) => reporter.name === currentReporter.name
+            );
+            if (targetReporter) {
+              targetReporter.checked = !checked;
+            }
+          }
         }
         return p;
       });
     });
   }
 
-  function openReporterDialog(catagName: string, group: any) {
+  function openReporterDialog(catagName: string, group: GroupType) {
     setReporterDialogData({
       name: catagName,
       group,
@@ -181,30 +188,30 @@ function App() {
         </div>
       </dialog>
       <dialog ref={reportersDialogRef} className="p-6  rounded-lg w-5/6">
-        {reporterDialogData.length === 0 ? (
+        {!reporterDialogData ? (
           <></>
         ) : (
           <ul>
-            {reporterDialogData.group.reporters.map((r: any) => {
+            {reporterDialogData.group.reporters.map((reporter: ReporterType) => {
               return (
-                <li className="flex justify-between items-center text-lg mb-3">
+                <li className="flex justify-between items-center text-lg mb-3" key={reporter.name}>
                   <label
-                    htmlFor={r.name}
+                    htmlFor={reporter.name}
                     className="flex justify-start items-center"
                   >
                     <input
                       type="checkbox"
-                      id={r.name}
-                      checked={r.checked}
-                      value={r.name}
-                      onChange={() => changeReporterAttend(r, r.checked)}
+                      id={reporter.name}
+                      checked={reporter.checked}
+                      value={reporter.name}
+                      onChange={() => changeReporterAttend(reporter, reporter.checked || false)}
                       className="mr-2 w-5 h-5"
                     />
-                    {r.name}
+                    {reporter.name}
                   </label>
                   <div>
-                    <a className="text-blue-500" href={`tel:${r.mobile}`}>
-                      {r.mobile}
+                    <a className="text-blue-500" href={`tel:${reporter.mobile}`}>
+                      {reporter.mobile}
                     </a>
                   </div>
                 </li>
@@ -242,36 +249,36 @@ function App() {
         <br />
       </header>
       <div className="flex-1 w-full text-left p-6 overflow-auto">
-        {data.map((d: any) => {
+        {data.map((d: CatagType) => {
           return (
-            <>
+            <React.Fragment key={d.name}>
               <div className="text-xl font-bold mb-4">{d.name}</div>
               <ul className="mb-8">
-                {d.group.map((g: any) => {
+                {d.groups.map((group: GroupType) => {
                   return (
-                    <li className="flex justify-between items-center text-lg mb-3">
+                    <li className="flex justify-between items-center text-lg mb-3" key={group.name}>
                       <div className="flex justify-start items-center">
                         <input
                           type="checkbox"
-                          checked={g.checked}
-                          value={g.name}
+                          checked={group.checked}
+                          value={group.name}
                           onChange={() =>
-                            changeCompanyAttend(d.name, g.name, g.checked)
+                            changeCompanyAttend(d.name, group.name, group.checked || false)
                           }
                           className="mr-2 w-5 h-5"
                         />
-                        <div onClick={() => openReporterDialog(d.name, g)}>
-                          {g.name}
+                        <div onClick={() => openReporterDialog(d.name, group)}>
+                          {group.name}
                         </div>
                       </div>
                       <div>
                         預計{" "}
                         <span className="font-bold text-gray-400">
-                          {g.reporters.length}
+                          {group.reporters.length}
                         </span>{" "}
                         人 / 實際{" "}
                         <span className="font-bold text-blue-500">
-                          {g.reporters.filter((r: any) => r.checked).length}
+                          {group.reporters.filter((reporter: ReporterType) => reporter.checked).length}
                         </span>{" "}
                         人
                       </div>
@@ -279,7 +286,7 @@ function App() {
                   );
                 })}
               </ul>
-            </>
+            </React.Fragment>
           );
         })}
       </div>
