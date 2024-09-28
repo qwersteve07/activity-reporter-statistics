@@ -148,6 +148,11 @@ function App() {
             if (targetReporter) {
               targetReporter.checked = !checked;
             }
+            if (targetGroup.reporters.every((reporter: ReporterType) => !reporter.checked)) {
+              targetGroup.checked = false
+            } else {
+              targetGroup.checked = true
+            }
           }
         }
         return p;
