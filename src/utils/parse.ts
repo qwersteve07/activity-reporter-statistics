@@ -8,6 +8,7 @@ export function csvToJson(csvString: string) {
 	const jsonData:any = [];
 	rows.forEach((row, i) => {
 		if (i === 0) return;
+		if(row === '') return ;
 		const obj:any = {};
 		const values = row.replace("\r", "").split(",");
 		for (let i = 0; i < headers.length; i++) {
