@@ -5,10 +5,10 @@ import { formatMobile } from "./format";
 export function csvToJson(csvString: string) {
 	const rows = csvString.split("\n");
 	const headers = rows[0].split(",");
-	const jsonData = [];
+	const jsonData:any = [];
 	rows.forEach((row, i) => {
 		if (i === 0) return;
-		const obj = {};
+		const obj:any = {};
 		const values = row.replace("\r", "").split(",");
 		for (let i = 0; i < headers.length; i++) {
 			const key = headers[i].trim();
