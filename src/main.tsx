@@ -5,7 +5,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import AppPage from './App.tsx'
-import UploadPage from './upload.tsx';
+import UploadPage from './Upload.tsx';
 import './index.css'
 
 const router = createBrowserRouter([
