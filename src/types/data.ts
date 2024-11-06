@@ -1,6 +1,6 @@
 export type CatagType = {
-    name: string,
-    groups: Array<GroupType>
+  name: string,
+  groups: Array<GroupType>
 }
 
 export type GroupType = {
@@ -12,5 +12,6 @@ export type GroupType = {
 export type ReporterType = {
   checked?: boolean,
   name: string,
-  mobile: string
+  mobile: string,
+  custom?: boolean
 }
