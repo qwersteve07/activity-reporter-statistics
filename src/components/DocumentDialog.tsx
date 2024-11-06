@@ -1,5 +1,6 @@
 import { forwardRef } from "react"
 import { copyToClipboard } from "../utils/clipboard";
+import Button from "./Button";
 
 const DocumentDialog = forwardRef(({ text, onClose }: { text: string, onClose: () => void }, ref: any) => {
 
@@ -17,19 +18,13 @@ const DocumentDialog = forwardRef(({ text, onClose }: { text: string, onClose: (
                 rows={20}
                 className="w-full"
             />
-            <div className="flex justify-between items-center">
-                <button
-                    className="mt-4 border-none bg-gray-300"
-                    onClick={copyText}
-                >
+            <div className="flex justify-between items-center mt-4">
+                <Button onClick={copyText}>
                     複製
-                </button>
-                <button
-                    className="mt-4 border-none bg-gray-300"
-                    onClick={onClose}
-                >
+                </Button>
+                <Button sub onClick={onClose}>
                     關閉
-                </button>
+                </Button>
             </div>
         </dialog>
     )
