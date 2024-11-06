@@ -1,9 +1,8 @@
 import { forwardRef, useState } from "react";
 import RoundedButton from "./RoundedButton";
 import Button from "./Button";
-import { ReporterType } from "../types/data";
 
-const EditCompanyDialog = forwardRef(({ onSave, onClose }: {
+const AddCompanyDialog = forwardRef(({ onSave, onClose }: {
     onSave: (companyName: string, reporters: Array<string>) => void
     onClose: () => void
 }, ref: any) => {
@@ -70,4 +69,4 @@ const EditCompanyDialog = forwardRef(({ onSave, onClose }: {
     )
 });
 
-export default EditCompanyDialog
+export default AddCompanyDialog
