@@ -5,7 +5,7 @@ import { sessionGetData } from "./utils/storage";
 import Group from "./components/Group";
 import DocumentDialog from "./components/DocumentDialog";
 import ReporterDialog from "./components/ReporterDialog";
-import EditCompanyDialog from "./components/EditCompanyDialog";
+import AddCompanyDialog from "./components/AddCompanyDialog";
 import generateReports from "./utils/generate-reports";
 import { getCompanyActualCounts, getCompanyEstimateCounts, getReporterActualCounts, getReporterEstimateCounts } from "./utils/getCounts";
 import useAppStore from "./app-store";
@@ -20,14 +20,14 @@ function AppPage() {
   }>();
   const reportersDialogRef = useRef<HTMLDialogElement>(null);
   const documentDialogRef = useRef<HTMLDialogElement>(null);
-  const editCompanyDialogRef = useRef<HTMLDialogElement>(null);
+  const addCompanyDialogRef = useRef<HTMLDialogElement>(null);
   const [document, setDocument] = useState<string>("");
   const appStore = useAppStore()
   const companyEstimateCounts = useMemo(() => getCompanyEstimateCounts(appStore.data), [appStore.data])
   const reporterEstimateCounts = useMemo(() => getReporterEstimateCounts(appStore.data), [appStore.data]);
   const companyActualCounts = useMemo(() => getCompanyActualCounts(appStore.data), [appStore.data])
   const reporterActualCounts = useMemo(() => getReporterActualCounts(appStore.data), [appStore.data]);
-  const [currentEditingCatag, setCurrentEditingCatag] = useState<string>('')
+  const [currentAddingCatag, setCurrentAddingCatag] = useState<string>('')
 
   useEffect(() => {
     const sessionData = sessionGetData();
@@ -116,30 +116,28 @@ function AppPage() {
   }
 
   function openAddCompanyDialog(catagName: string) {
-    setCurrentEditingCatag(catagName)
-    editCompanyDialogRef.current?.showModal();
+    setCurrentAddingCatag(catagName)
+    addCompanyDialogRef.current?.showModal();
   }
 
-  function closeEditCompanyDialog() {
-    setCurrentEditingCatag('')
-    editCompanyDialogRef.current?.close();
+  function closeAddCompanyDialog() {
+    setCurrentAddingCatag('')
+    addCompanyDialogRef.current?.close();
   }
 
   function saveCompanyData(companyName: string, reporters: string[]) {
-    console.log(companyName, reporters)
-    const newCatagData = appStore.data.find(x => x.name === currentEditingCatag)
-    if (newCatagData) {
-      newCatagData.groups.push({
-        name: companyName,
-        checked: true,
-        reporters: reporters.filter(x => x !== '').map(x => ({ checked: true, mobile: '', name: x }))
-      })
-    }
-
-    const newData = appStore.data;
-    newData.splice(appStore.data.findIndex(x => x.name === currentEditingCatag), 1, newCatagData ?? {})
+    const newData = appStore.data.map((p: CatagType) => {
+      if (p.name === currentAddingCatag) {
+        p.groups = [...p.groups, {
+          name: companyName,
+          checked: true,
+          reporters: reporters.filter(x => x !== '').map(x => ({ checked: true, mobile: '', name: x }))
+        }]
+      }
+      return p;
+    });
     appStore.setData(newData)
-    closeEditCompanyDialog()
+    closeAddCompanyDialog()
   }
 
   if (appStore.data.length === 0) return <div />
@@ -148,7 +146,7 @@ function AppPage() {
     <main className="flex flex-col justify-between items-center h-dvh">
       <DocumentDialog ref={documentDialogRef} text={document} onClose={closeDocumentDialog} />
       <ReporterDialog ref={reportersDialogRef} data={reporterDialogData} onChangeReporterAttend={onChangeReporterAttend} onClose={closeReporterDialog} />
-      <EditCompanyDialog ref={editCompanyDialogRef} onClose={closeEditCompanyDialog} onSave={saveCompanyData} />
+      <AddCompanyDialog ref={addCompanyDialogRef} onClose={closeAddCompanyDialog} onSave={saveCompanyData} />
       <header className="text-left text-2xl w-full pb-4 border-b-2 p-6 ">
         預計出席：
         <span className="font-bold text-gray-400">
