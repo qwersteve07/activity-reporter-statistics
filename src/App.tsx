@@ -48,7 +48,7 @@ function AppPage() {
     });
 
     appStore.setData(newData);
-    sessionSaveData(newData);
+
   }
 
   function onChangeReporterAttend(
@@ -84,7 +84,7 @@ function AppPage() {
     });
 
     appStore.setData(newData);
-    sessionSaveData(newData);
+
   }
 
   function openReporterDialog(catagName: string, group: GroupType) {

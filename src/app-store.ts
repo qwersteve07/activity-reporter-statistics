@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { CatagType } from './types/data'
+import { sessionSaveData } from './utils/storage'
 
 interface AppState {
   data: Array<CatagType>
@@ -7,8 +8,11 @@ interface AppState {
 }
 
 const useAppStore = create<AppState>((set) => ({
-    data: [],
-    setData: (newData: Array<CatagType>)=> set({data: newData})
+  data: [],
+  setData: (newData: Array<CatagType>) => {
+    sessionSaveData(newData);
+    set({ data: newData })
+  }
 }))
 
 
