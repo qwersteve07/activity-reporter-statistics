@@ -46,7 +46,7 @@ function generateReports(data: Array<CatagType>, companyCounts: number, reporter
       return `${data[i].name}\n${data[i].groups
         .filter((g) => g.checked)
         .map((g) => {
-          return `${g.name}（${g.reporters.map(reporter => {
+          return `${g.name}（${g.reporters.filter(reporter => reporter.checked).map(reporter => {
             return `${reporter.name}`
           }).join('、')}）`
         })
