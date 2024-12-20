@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect } from "react";
 import useAppStore from "./app-store";
-import { CatagType, GroupType, ReporterType } from "./types/data";
+import { CatagType, GroupType, ReporterStatus, ReporterType } from "./types/data";
 import { csvToJson, jsonToRawData } from "./utils/parse";
 import { sessionGetData } from "./utils/storage";
 import { useNavigate } from "react-router-dom";
@@ -36,6 +36,7 @@ function UploadPage() {
                             (reporter: ReporterType) => ({
                                 ...reporter,
                                 checked: false,
+                                status: ReporterStatus.UNKNOWN
                             })
                         );
                         return { ...group, reporters, checked: false };

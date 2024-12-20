@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
-import { CatagType, GroupType, ReporterType } from "./types/data";
+import { CatagType, GroupType, ReporterStatus, ReporterType } from "./types/data";
 import { sessionGetData } from "./utils/storage";
 import Group from "./components/Group";
 import DocumentDialog from "./components/DocumentDialog";
@@ -95,6 +95,33 @@ function AppPage() {
 
   }
 
+  function onChangeReporterStatus(
+    currentReporter: ReporterType,
+    status: ReporterStatus
+  ) {
+    console.log(status)
+    const newData = appStore.data.map((p: CatagType) => {
+      if (p.name === reporterDialogData?.name) {
+        const targetGroup = p.groups.find(
+          (group: GroupType) =>
+            group.name === reporterDialogData.group.name
+        );
+        if (targetGroup) {
+          const targetReporter = targetGroup.reporters.find(
+            (reporter: ReporterType) =>
+              reporter.name === currentReporter.name
+          );
+          if (targetReporter) {
+            targetReporter.status = status
+          }
+        }
+      }
+      return p;
+    });
+
+    appStore.setData(newData);
+  }
+
   function openReporterDialog(catagName: string, group: GroupType) {
     setReporterDialogData({
       name: catagName,
@@ -131,7 +158,7 @@ function AppPage() {
         p.groups = [...p.groups, {
           name: companyName,
           checked: true,
-          reporters: reporters.filter(x => x !== '').map(x => ({ checked: true, mobile: '', name: x }))
+          reporters: reporters.filter(x => x !== '').map(x => ({ checked: true, mobile: '', name: x, status: ReporterStatus.UNKNOWN }))
         }]
       }
       return p;
@@ -145,7 +172,7 @@ function AppPage() {
   return (
     <main className="flex flex-col justify-between items-center h-dvh">
       <DocumentDialog ref={documentDialogRef} text={document} onClose={closeDocumentDialog} />
-      <ReporterDialog ref={reportersDialogRef} data={reporterDialogData} onChangeReporterAttend={onChangeReporterAttend} onClose={closeReporterDialog} />
+      <ReporterDialog ref={reportersDialogRef} data={reporterDialogData} onChangeReporterAttend={onChangeReporterAttend} onChangeReporterStatus={onChangeReporterStatus} onClose={closeReporterDialog} />
       <AddCompanyDialog ref={addCompanyDialogRef} onClose={closeAddCompanyDialog} onSave={saveCompanyData} />
       <header className="text-left text-2xl w-full pb-4 border-b-2 p-6 ">
         預計出席：

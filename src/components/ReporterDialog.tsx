@@ -1,16 +1,34 @@
 import { forwardRef } from "react";
-import { CatagType, GroupType, ReporterType } from "../types/data";
+import { CatagType, GroupType, ReporterStatus, ReporterType } from "../types/data";
 import RoundedButton from "./RoundedButton";
 import useAppStore from "../app-store";
 
-const ReporterDialog = forwardRef(({ data, onChangeReporterAttend, onClose }: {
+const ReporterDialog = forwardRef(({ data, onChangeReporterAttend, onChangeReporterStatus, onClose }: {
     data: {
         name: string;
         group: GroupType;
     } | undefined,
     onChangeReporterAttend: (reporter: ReporterType, checked: boolean) => void,
+    onChangeReporterStatus: (reporter: ReporterType, status: string) => void,
     onClose: () => void
 }, ref: any) => {
+
+    const reporterStatusTypes = [
+        {
+            type: ReporterStatus.UNKNOWN,
+            text: '未知'
+        },
+        {
+            type: ReporterStatus.ATTEND,
+            text: '可出席'
+        }, {
+            type: ReporterStatus.NOT_ATTENDING,
+            text: '不出席'
+        }, {
+            type: ReporterStatus.NO_ANSWER,
+            text: '未接通'
+        }
+    ]
 
     const appStore = useAppStore()
 
@@ -25,7 +43,7 @@ const ReporterDialog = forwardRef(({ data, onChangeReporterAttend, onClose }: {
                 );
                 if (targetGroup) {
                     targetGroup.checked = true;
-                    targetGroup.reporters = [...targetGroup.reporters, { name: '', checked: true, mobile: '', custom: true }]
+                    targetGroup.reporters = [...targetGroup.reporters, { name: '', checked: true, mobile: '', custom: true, status: ReporterStatus.UNKNOWN }]
                 }
             }
             return p;
@@ -52,6 +70,15 @@ const ReporterDialog = forwardRef(({ data, onChangeReporterAttend, onClose }: {
         appStore.setData(newData)
     }
 
+    const reporterStatusClass = (reporter: ReporterType) => {
+        switch (reporter.status) {
+            case ReporterStatus.ATTEND: return 'text-blue-500 font-semibold'
+            case ReporterStatus.NOT_ATTENDING: return 'text-gray-400 font-semibold'
+            case ReporterStatus.NO_ANSWER: return 'text-red-500 font-semibold'
+            case ReporterStatus.UNKNOWN: return 'text-gray-500 '
+        }
+    }
+
     return (
         <dialog
             ref={ref}
@@ -72,7 +99,8 @@ const ReporterDialog = forwardRef(({ data, onChangeReporterAttend, onClose }: {
                                     >
                                         <label
                                             htmlFor={reporter.name}
-                                            className="flex justify-start items-center w-full"
+                                            className={`flex justify-start items-center w-full  ${reporterStatusClass(reporter)}`}
+
                                         >
                                             <input
                                                 type="checkbox"
@@ -99,6 +127,16 @@ const ReporterDialog = forwardRef(({ data, onChangeReporterAttend, onClose }: {
                                                 </>
                                                 : reporter.name}
                                         </label>
+                                        {!reporter.custom && (
+                                            <select
+                                                value={reporter.status}
+                                                className="border rounded-lg appearance-none py-0.5 px-3 mr-2 text-gray-500"
+                                                onChange={(e) => onChangeReporterStatus(reporter, e.target.value)}>
+                                                {reporterStatusTypes.map(t => {
+                                                    return <option key={t.type} value={t.type}>{t.text}</option>
+                                                })}
+                                            </select>
+                                        )}
                                         <div>
                                             <a
                                                 className="text-blue-500"
