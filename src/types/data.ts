@@ -21,5 +21,5 @@ export type ReporterType = {
   name: string,
   mobile: string,
   custom?: boolean
-  status: ReporterStatus
+  status?: ReporterStatus
 }

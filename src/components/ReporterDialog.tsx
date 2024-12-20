@@ -9,7 +9,7 @@ const ReporterDialog = forwardRef(({ data, onChangeReporterAttend, onChangeRepor
         group: GroupType;
     } | undefined,
     onChangeReporterAttend: (reporter: ReporterType, checked: boolean) => void,
-    onChangeReporterStatus: (reporter: ReporterType, status: string) => void,
+    onChangeReporterStatus: (reporter: ReporterType, status: ReporterStatus) => void,
     onClose: () => void
 }, ref: any) => {
 
@@ -131,7 +131,7 @@ const ReporterDialog = forwardRef(({ data, onChangeReporterAttend, onChangeRepor
                                             <select
                                                 value={reporter.status}
                                                 className="border rounded-lg appearance-none py-0.5 px-3 mr-2 text-gray-500"
-                                                onChange={(e) => onChangeReporterStatus(reporter, e.target.value)}>
+                                                onChange={(e) => onChangeReporterStatus(reporter, e.target.value as ReporterStatus)}>
                                                 {reporterStatusTypes.map(t => {
                                                     return <option key={t.type} value={t.type}>{t.text}</option>
                                                 })}
